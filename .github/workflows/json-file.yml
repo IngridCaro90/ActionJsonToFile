@@ -2,13 +2,28 @@ name: Generar archivo JSON y subir como artefacto
 
 on:
   workflow_dispatch:
+    inputs:
+      txt:
+        description: Nombre de la ejecución (opcional)
+        required: false
+        type: string
 
 jobs:
   generar-y-subir:
-    name: Generar Json
+    name: Generar y subir JSON
     runs-on: ubuntu-latest
+    env:
+      DEFAULT_NAME: jsonFile
+
     steps:
-      - name: Crear archivo JSON con action json-to-file
+      - name: Definir nombre del archivo y artefacto
+        id: nombres
+        run: |
+          INPUT="${{ github.event.inputs.txt }}"
+          NAME="${INPUT:-$DEFAULT_NAME}"
+          echo "name_base=$NAME" >> $GITHUB_OUTPUT
+
+      - name: Crear archivo JSON
         uses: devops-actions/json-to-file@v1.0.0
         with:
           json: |
@@ -18,10 +33,10 @@ jobs:
               "module": 2,
               "isRequired": false
             }
-          filename: 'jsonFile.json'
+          filename: '${{ steps.nombres.outputs.name_base }}.json'
 
       - name: Subir archivo JSON como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: archivo-json
-          path: jsonFile.json
+          name: '${{ steps.nombres.outputs.name_base }}'
+          path: '${{ steps.nombres.outputs.name_base }}.json'
