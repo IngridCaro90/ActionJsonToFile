@@ -1,31 +1,42 @@
 name: cache-json-artifact
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      txt:
+        description: Nombre de la ejecución
+        required: true
+        type: string
 
 jobs:
   cache-and-upload-json:
     runs-on: ubuntu-latest
     steps:
-      - name: Set cache key based on JSON content
-        run: |
-          JSON_CONTENT='{"name":"pipelines","activity":3,"module":2,"isRequired":false}'
-          echo "key=json-$(echo $JSON_CONTENT | sha256sum | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Restore cache for JSON
+      - name: Calcular hash basado en archivo.json
+        id: set-key
+        run: |
+          HASH="${{ hashFiles('archivo.json') }}"
+          echo "key=json-$HASH" >> $GITHUB_OUTPUT
+
+      - name: Restaurar cache si existe
         id: cache-json
         uses: actions/cache@v4
         with:
           path: archivo.json
           key: ${{ steps.set-key.outputs.key }}
 
-      - name: Generate JSON file
+      - name: Generar JSON si no hay cache
         if: steps.cache-json.outputs.cache-hit != 'true'
         uses: devops-actions/json-to-file@v1.0.4
         with:
           json: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
 
-      - name: Result
+      - name: Resultado
         run: |
           if [ "${{ steps.cache-json.outputs.cache-hit }}" = "true" ]; then
             echo "El contenido NO cambió respecto al cache previo."
@@ -33,7 +44,7 @@ jobs:
             echo "El contenido CAMBIÓ y se generó un nuevo archivo."
           fi
 
-      - name: Upload JSON file
+      - name: Subir como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: artifact-json
