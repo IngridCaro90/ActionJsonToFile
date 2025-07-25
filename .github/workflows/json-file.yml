@@ -20,7 +20,7 @@ jobs:
         if: steps.cache-json.outputs.cache-hit != 'true'
         uses: devops-actions/json-to-file@v1.0.4
         with:
-          json: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
+          json: '{"name": "pipeline","activity": 3,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
 
       - name: Save new cache if file changed
