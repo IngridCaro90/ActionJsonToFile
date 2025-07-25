@@ -16,17 +16,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Convert to JSON
-        uses: devops-actions/json-to-file@v1.0.4
-        with:
-          json: '{"name": "pipelines","activity": 4,"module": 2,"isRequired": false}'
-          filename: 'archivo.json'
-
-      - name: Cache JSON
+      - name: Restore cache
         uses: actions/cache@v4
         with:
           path: archivo.json
-          key: json-${{ hashFiles('archivo.json') }}
+          key: json-cache-${{ hashFiles('archivo.json') }}
+
+      - name: Convert to JSON
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: devops-actions/json-to-file@v1.0.4
+        with:
+          json: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
+          filename: 'archivo.json'
 
       - name: Check for changes in JSON
         run: |
