@@ -10,25 +10,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Restore cache for JSON
-        uses: actions/cache@v4
-        with:
-          path: archivo.json
-          key: json-${{ hashFiles('archivo.json') }}
-
-      - name: Generate JSON file
-        if: steps.cache-json.outputs.cache-hit != 'true'
+      - name: Convert to JSON
         uses: devops-actions/json-to-file@v1.0.4
         with:
-          json: '{"name": "pipeline","activity": 3,"module": 2,"isRequired": false}'
+          pjson: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
 
-      - name: Save new cache if file changed
-        if: steps.cache-json.outputs.cache-hit != 'true'
+      - name: Cache JSON
         uses: actions/cache@v4
         with:
           path: archivo.json
           key: json-${{ hashFiles('archivo.json') }}
+
+      - name: Check for changes in JSON
+        run: |
+          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
+            echo "El contenido NO cambió respecto al cache previo."
+          else
+            echo "El contenido CAMBIÓ y se generó un nuevo archivo."
+          fi
 
       - name: Upload JSON file
         uses: actions/upload-artifact@v4
