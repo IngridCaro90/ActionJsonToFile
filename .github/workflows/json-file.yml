@@ -13,24 +13,18 @@ jobs:
   cache-and-upload-json:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 1. Generar el JSON (siempre primero, así el hash refleja el contenido nuevo)
       - name: Generar JSON
         uses: devops-actions/json-to-file@v1.0.4
         with:
           json: '{"name": "pipelines","activity": 4,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
 
-      # 2. Calcular hash del archivo recién generado
       - name: Calcular hash basado en archivo.json
         id: set-key
         run: |
           HASH="${{ hashFiles('archivo.json') }}"
           echo "key=json-$HASH" >> $GITHUB_OUTPUT
 
-      # 3. Restaurar cache (nota: el cache key ya es del archivo nuevo)
       - name: Restaurar cache si existe
         id: cache-json
         uses: actions/cache@v4
@@ -38,7 +32,6 @@ jobs:
           path: archivo.json
           key: ${{ steps.set-key.outputs.key }}
 
-      # 4. Resultado
       - name: Resultado
         run: |
           if [ "${{ steps.cache-json.outputs.cache-hit }}" = "true" ]; then
@@ -47,7 +40,6 @@ jobs:
             echo "El contenido CAMBIÓ y se generó un nuevo archivo."
           fi
 
-      # 5. Subir como artefacto
       - name: Subir como artefacto
         uses: actions/upload-artifact@v4
         with:
