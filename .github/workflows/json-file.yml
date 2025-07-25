@@ -12,6 +12,9 @@ jobs:
   cache-and-upload-json:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set cache key based on JSON content
         run: |
           JSON_CONTENT='{"name":"pipelines","activity":3,"module":2,"isRequired":false}'
