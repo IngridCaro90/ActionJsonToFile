@@ -1,33 +1,34 @@
-name: upload-artifact
+name: cache-json-artifact
 
-on:
-  workflow_dispatch:
-    inputs:
-      num1:
-        description: Nombre de la ejecución
-        required: true
-        type: string
+on: push
 
 jobs:
-  convert_and_upload_text_to_json:
-    name: Convert and upload text to JSON
+  cache-and-upload-json:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Restore cache
+      - name: Restore cache for JSON
+        id: cache-json
         uses: actions/cache@v4
         with:
           path: archivo.json
-          key: json-cache-${{ hashFiles('archivo.json') }}
+          key: json-${{ hashFiles('archivo.json') }}
 
-      - name: Convert to JSON
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Generate JSON file
+        if: steps.cache-json.outputs.cache-hit != 'true'
         uses: devops-actions/json-to-file@v1.0.4
         with:
           json: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
+
+      - name: Save new cache if file changed
+        if: steps.cache-json.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: archivo.json
+          key: json-${{ hashFiles('archivo.json') }}
 
       - name: Check for changes in JSON
         run: |
@@ -40,5 +41,5 @@ jobs:
       - name: Upload JSON file
         uses: actions/upload-artifact@v4
         with:
-          name: artifact
+          name: artifact-json
           path: archivo.json
