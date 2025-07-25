@@ -1,26 +1,18 @@
 name: cache-json-artifact
 
-on:
-  workflow_dispatch:
-    inputs:
-      txt:
-        description: Ingrese nombre de ejecución
-        required: true
-        type: string
+on: push
 
 jobs:
   cache-and-upload-json:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Set cache key based on JSON content
         run: |
           JSON_CONTENT='{"name":"pipelines","activity":3,"module":2,"isRequired":false}'
           echo "key=json-$(echo $JSON_CONTENT | sha256sum | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
       - name: Restore cache for JSON
+        id: cache-json
         uses: actions/cache@v4
         with:
           path: archivo.json
