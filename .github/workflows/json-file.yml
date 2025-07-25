@@ -30,7 +30,7 @@ jobs:
           path: archivo.json
           key: json-${{ hashFiles('archivo.json') }}
 
-      - name: Check for changes in JSON
+      - name: Result
         run: |
           if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
             echo "El contenido NO cambió respecto al cache previo."
