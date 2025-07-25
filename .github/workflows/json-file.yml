@@ -1,21 +1,14 @@
-name: cache-json-artifact
+name: upload-artifact-with-cache
 
 on:
   workflow_dispatch:
-    inputs:
-      txt:
-        description: Ingrese nombre de ejecución
-        required: true
-        type: string
 
 jobs:
-  cache-and-upload-json:
+  convert_and_upload_text_to_json:
+    name: Convert and upload text to JSON
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Restore cache for JSON
+      - name: Restore JSON cache
         id: cache-json
         uses: actions/cache@v4
         with:
@@ -29,23 +22,16 @@ jobs:
           json: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
 
-      - name: Save new cache if file changed
-        if: steps.cache-json.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
-        with:
-          path: archivo.json
-          key: json-${{ hashFiles('archivo.json') }}
-
-      - name: Result
+      - name: Check for changes in JSON
         run: |
-          if [ "${{ steps.cache.outputs.cache-hit }}" = "true" ]; then
-            echo "El contenido NO cambió respecto al cache previo."
+          if [ "${{ steps.cache-json.outputs.cache-hit }}" == 'true' ]; then
+            echo "No hay cambios en el JSON, usando cache existente"
           else
-            echo "El contenido CAMBIÓ y se generó un nuevo archivo."
+            echo "Contenido del JSON cambió, se generó nuevo archivo"
           fi
 
       - name: Upload JSON file
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-json
+          name: artifact
           path: archivo.json
