@@ -1,6 +1,12 @@
 name: cache-json-artifact
 
-on: push
+on:
+  workflow_dispatch:
+    inputs:
+      txt:
+        description: Ingrese nombre de ejecución
+        required: true
+        type: string
 
 jobs:
   cache-and-upload-json:
