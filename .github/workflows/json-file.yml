@@ -1,7 +1,7 @@
 name: cache-json
 
 on:
-  push:
+  push: {}
   workflow_dispatch:
     inputs:
       txt:
@@ -19,21 +19,15 @@ jobs:
       - name: Generar JSON
         uses: devops-actions/json-to-file@v1.0.4
         with:
-          json: '{"name": "pipelines","activity": 4,"module": 2,"isRequired": false}'
+          json: '{"name": "pipelines","activity": 3,"module": 2,"isRequired": false}'
           filename: 'archivo.json'
-
-      - name: Calcular hash basado en archivo.json
-        id: set-key
-        run: |
-          HASH="${{ hashFiles('archivo.json') }}"
-          echo "key=json-$HASH" >> $GITHUB_OUTPUT
 
       - name: Restaurar cache si existe
         id: cache-json
         uses: actions/cache@v4
         with:
           path: archivo.json
-          key: ${{ steps.set-key.outputs.key }}
+          key: json-${{ hashFiles('archivo.json') }}
 
       - name: Resultado
         run: |
@@ -48,4 +42,3 @@ jobs:
         with:
           name: artifact-json
           path: archivo.json
-
